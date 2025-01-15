@@ -1,6 +1,3 @@
-# key-recovery-attack-with-exchange-attack
-key recovery attack on 5-round aes with exchange attack
-
 This repository contains the implementation of the key recovery attacks presented in our paper:
 - Key-Recovery Attacks on Reduced-Round AES with Exchange Attacks, Hanbeom Shin, Dongjae Lee2, Deukjo Hong3, Jaechul Sung4, Seokhie Hong.
 
