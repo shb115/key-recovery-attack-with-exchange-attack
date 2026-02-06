@@ -8,7 +8,7 @@ This repository contains the proof-of-concept implementation of the key-recovery
 
 ## Overview
 
-This project implements the **Exchange Distinguisher** and **Key-Recovery Attacks** on reduced-round AES. The implementation focuses on verifying the theoretical claims regarding:
+This project implements the **Exchange Distinguisher** and **Key-Recovery Attack** on **5-round AES**. The implementation focuses on verifying the theoretical claims regarding:
 
 1.  **Equivalence Classes:** Validating that right pairs appear in groups of two (Theorem 2).
 2.  **Probabilistic Model:** Verifying the refined success probabilities based on the equivalence class structure.
@@ -21,12 +21,12 @@ This project implements the **Exchange Distinguisher** and **Key-Recovery Attack
 The implementation consists of the following main components:
 
 * **`exchange_distinguisher.c`**
-    * Implements the 5-round exchange distinguishers.
+    * Implements the **5-round** exchange distinguisher.
     * Verifies the distribution of right pairs and the formation of equivalence classes.
     * Counts the number of detected pairs and validates the theoretical probability model.
 
 * **`exchange_keyrecovery.c`**
-    * Implements the key-recovery attack logic.
+    * Implements the **5-round** key-recovery attack logic.
     * Performs the 5-round key-recovery attack using the structural properties of right pairs.
     * Verifies the filtering condition (Observation 1) and calculates the success rate of the attack.
 
@@ -59,7 +59,33 @@ You can easily compile the source codes using the provided `Makefile`.
 ## Usage
 
 ### 1. Running the Distinguisher
-To verify the equivalence class structure and the probability of the exchange distinguisher:
+To verify the equivalence class structure and the probability of the 5-round exchange distinguisher:
 
 ```bash
 ./distinguisher
+```
+
+* **Goal:** This verifies whether the right pairs appear in even numbers (equivalence classes).
+* **Output:** The number of right pairs found in each trial (default: 100 trials).
+
+### 2. Running the Key Recovery Attack
+To verify the validity of the 5-round key-recovery attack logic:
+
+```bash
+./key_recovery
+```
+
+* **Goal:** This verifies the logic of the 5-round key recovery attack.
+* **Process:** It generates structures, identifies right pairs, and applies the filtering logic to check if the correct key passes and wrong keys are filtered as expected.
+* **Output:** Verification logs showing "Right Pair Found", "Correct Key PASS", and "Wrong Key" filtering statistics.
+
+## Experimental Results
+
+The experimental results provided by these codes support the claims made in the paper:
+
+* **Equivalence Classes:** Right pairs are consistently found in multiples of 2.
+* **Success Probability:** The experimental success rate aligns with our refined probabilistic model (approx. 54% for the standard structure size), deviating from the previous independent trial assumption.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
