@@ -5,7 +5,6 @@ This repository contains the proof-of-concept implementation of the key-recovery
 **"Revisiting Exchange Distinguisher and Key-Recovery Attacks on Reduced-Round AES"**
 
 * **Authors:** Hanbeom Shin, Byoungjin Seok, Dongjae Lee, Deukjo Hong, Jaechul Sung, Seokhie Hong.
-* **Status:** Submitted to *IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences*.
 
 ## Overview
 
