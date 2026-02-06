@@ -21,7 +21,7 @@ This project implements the **Exchange Distinguisher** and **Key-Recovery Attack
 The implementation consists of the following main components:
 
 * **`exchange_distinguisher.c`**
-    * Implements the 5-round and 6-round exchange distinguishers.
+    * Implements the 5-round exchange distinguishers.
     * Verifies the distribution of right pairs and the formation of equivalence classes.
     * Counts the number of detected pairs and validates the theoretical probability model.
 
@@ -45,19 +45,13 @@ To run the code, you need a system that supports the **AES-NI** instruction set.
 
 You can easily compile the source codes using the provided `Makefile`.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/shb115/key-recovery-attack-with-exchange-attack.git](https://github.com/shb115/key-recovery-attack-with-exchange-attack.git)
-    cd key-recovery-attack-with-exchange-attack
-    ```
-
-2.  **Compile the executables:**
+1.  **Compile the executables:**
     ```bash
     make
     ```
     This command will generate two executables: `distinguisher` and `key_recovery`.
 
-3.  **(Optional) Clean up build files:**
+2.  **(Optional) Clean up build files:**
     ```bash
     make clean
     ```
