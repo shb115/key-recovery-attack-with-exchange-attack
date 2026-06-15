@@ -1,0 +1,28 @@
+==============================================================
+[*] Direct one-round measurement of P_5(1,1)  (Small-AES, c=4)
+    Active diagonals : 3   Inactive (k) : 1
+    Trials           : 1073741824 (2^30.00)
+    Expected P_5(1,1) = 4.187226e-06  (2^-17.8656)
+        j=1 term : 3.814697e-06  (C(4,1)=4, fraction 0.9110)
+        j=2 term : 3.576279e-07  (C(4,2)=6, fraction 0.0854)
+        j=3 term : 1.490116e-08  (C(4,3)=4, fraction 0.0036)
+==============================================================
+
+--- Result ---
+Trials                       : 1073741824
+
+[1] E[# valid masks] (matches the formula by linearity)
+    observed  : 4.147179e-06  (2^-17.8794)
+    formula   : 4.187226e-06  (2^-17.8656)  = sum_j C(4,j) P(1,j,1)
+    ratio     : 0.9904
+    approx. error : 1.50%
+
+    per-weight (E[# weight-j masks] = C(4,j) P(1,j,1)):
+      j=1 : observed 3.779307e-06 (2^-18.0134)   formula 3.814697e-06 (2^-18.0000)   ratio 0.9907
+      j=2 : observed 3.557652e-07 (2^-21.4226)   formula 3.576279e-07 (2^-21.4150)   ratio 0.9948
+      j=3 : observed 1.210719e-08 (2^-26.2996)   formula 1.490116e-08 (2^-26.0000)   ratio 0.8125
+
+[2] P[at least one valid mask] (operational trail probability)
+    observed  : 4.100613e-06  (2^-17.8957)
+    note: <= formula because the formula is a union-bound sum;
+          the gap is the overlap between distinct exchange masks.

@@ -1,0 +1,13 @@
+# Build outputs (Makefile targets)
+/Codes/aes/distinguisher
+/Codes/aes/key_recovery
+/Codes/small_aes/small_aes_p5
+
+# Compiled objects / binaries
+*.o
+*.out
+*.exe
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
