@@ -1,7 +1,14 @@
 # Build outputs (Makefile targets)
 /Codes/aes/distinguisher
 /Codes/aes/key_recovery
+/Codes/small_aes/small_aes_distinguisher
+/Codes/small_aes/small_aes_keyrecovery
+/Codes/small_aes/small_aes_r2_diagnostic
 /Codes/small_aes/small_aes_p5
+
+# Intermediate per-process outputs of the run scripts
+runs/
+*.err
 
 # Compiled objects / binaries
 *.o
@@ -11,3 +18,4 @@
 # OS / editor cruft
 .DS_Store
 Thumbs.db
+__pycache__/

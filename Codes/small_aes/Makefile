@@ -1,36 +1,15 @@
-# Compiler settings
+# Small-Scale AES experiments (4-bit cells); no special instruction set needed.
 CC = gcc
-
-# Compiler flags
-# -O3   : Optimize for maximum speed
-# -Wall : Enable all standard warnings
-# (AES-NI is not required here; Small-AES uses 4-bit-cell T-tables.)
 CFLAGS = -O3 -Wall
-
-# Linker flags
-# -lm   : Link the math library (used for the log/exp/factorial computations)
 LDFLAGS = -lm
+TARGETS = small_aes_distinguisher small_aes_keyrecovery small_aes_r2_diagnostic small_aes_p5
 
-# Target executable name
-TARGET = small_aes_p5
+all: $(TARGETS)
 
-# Source file name
-SRC = small_aes_p5.c
+%: %.c
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-# ---------------------------------------------------------------------------
-# Build Rules
-# ---------------------------------------------------------------------------
-
-# Default target: Build the executable
-all: $(TARGET)
-
-# Rule to build the Small-AES P_5 measurement
-$(TARGET): $(SRC)
-	$(CC) -o $(TARGET) $(SRC) $(CFLAGS) $(LDFLAGS)
-	@echo "Built $(TARGET) successfully."
-
-# Clean rule: Remove the executable
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGETS)
 
 .PHONY: all clean

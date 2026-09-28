@@ -1,116 +1,129 @@
-# Key-Recovery Attacks on Reduced-Round AES with Exchange Attacks
+# Revisiting Exchange Distinguisher and Key-Recovery Attacks on Reduced-Round AES
 
-This repository contains the proof-of-concept implementation of the key-recovery attacks presented in our paper:
+Code, raw results, and random seeds for the experiments of the paper
 
 **"Revisiting Exchange Distinguisher and Key-Recovery Attacks on Reduced-Round AES"**
-
-* **Authors:** Hanbeom Shin, Byoungjin Seok, Dongjae Lee, Deukjo Hong, Jaechul Sung, Seokhie Hong.
+Hanbeom Shin, Byoungjin Seok, Dongjae Lee, Deukjo Hong, Jaechul Sung, Seokhie Hong.
 
 ## Overview
 
-This project implements the **Exchange Distinguisher** and **Key-Recovery Attack** on **5-round AES**. The implementation focuses on verifying the theoretical claims regarding:
+The experiments cover:
 
-1.  **Equivalence Classes:** Validating that right pairs appear in groups of two (Theorem 2).
-2.  **Probabilistic Model:** Verifying the refined success probabilities based on the equivalence class structure.
-3.  **Key Recovery:** Demonstrating the attack utilizing the zero-difference property in non-zero columns (Observation 1) without key-guessing rounds.
+1. **Distribution of the number of detected classes** of the 5-round exchange distinguisher.
+   Right pairs occur in classes of size two (Theorem 2). The number of detected classes is
+   modeled by a Poisson distribution conditional on the plaintext structure,
+   `N | S ~ Pois(lambda_S)` with `lambda_S = M_S * q + N_cls * 2^-62` (Section 3.2).
+   Here `M_S` is the number of classes of the structure that satisfy the one-round exchange
+   condition. The model is tested on Small-Scale AES with 10^6 trials (Section 3.3.1) and on
+   full AES (Section 3.3.2).
+2. **Key recovery without key-guessing rounds** (Section 4). The attack uses the exact
+   first-round zero-byte patterns (Observation 1) and the rule "keep the key guesses
+   consistent with at least two detected classes, ranked by the number of consistent
+   classes". The attack is run end to end on Small-Scale AES and on full AES.
 
-In addition, a **Small-Scale AES** experiment directly measures the one-round exchange probability `P_5(1,k)`, which underlies the **6-round** distinguisher whose full simulation is computationally infeasible.
+## Repository structure
 
-> **Note:** The full-AES code is written in **C** and optimized using **AES-NI (Intel Advanced Encryption Standard New Instructions)** for high-performance verification. The Small-Scale AES code uses 4-bit-cell T-tables and requires no special instruction set.
+```
+Codes/
+  aes/                          full AES (AES-NI)
+    exchange_distinguisher.c    5-round distinguisher, 2^(2L) texts per trial, per-trial
+                                class counts, trail/non-trail labels, exact M_S and lambda_S
+    exchange_keyrecovery.c      end-to-end 5-round key recovery (two structures), exact
+                                pattern filter, ranked candidates, known-pair verification;
+                                M = 0 runs a synthetic test of the filter
+    lambda_structure.py         exact lambda_S of random full-AES structures without
+                                encryption (also with the glibc / MSVCRT rand() streams)
+    legacy/                     code of the previous version of the paper
+  small_aes/                    Small-Scale AES with 4-bit cells
+    small_aes_distinguisher.c   5-round distinguisher (class counts, trail labels, M_S)
+    small_aes_keyrecovery.c     end-to-end key recovery (previous filter vs. new rule)
+    small_aes_r2_diagnostic.c   zero cells / diagonals of the 2-round difference of detected pairs
+    small_aes_p5.c              direct measurement of the one-round probability P_5(1,k)
+  analysis/
+    analyze_small_aes.py        histogram, index of dispersion, chi-square tests
+                                (single Poisson and mixed Poisson), conditional analysis
+    analyze_full_aes.py         the same for full AES, with tests using the known lambda_S
+scripts/
+  run_small_aes.sh              reproduces Results/small_aes (exact seeds)
+  run_full_aes.sh               full-AES distinguisher and key-recovery runs
+Results/
+  small_aes/distribution/       per-trial CSV files (see below)
+  small_aes/keyrecovery/        per-attack CSV file
+  small_aes/p5/                 P_5(1,k) measurements
+  aes/lambda_structure/         exact lambda_S of random full-AES structures
+  aes/distribution/             full-AES distinguisher runs
+  aes/keyrecovery/              full-AES key-recovery runs
+  aes/previous_100_trials/      results of the previous version (100 trials)
+```
 
-## Repository Structure
+## Build
 
-The full-AES and Small-Scale AES implementations are placed in the `aes/` and `small_aes/` subdirectories of `Codes/` (and likewise under `Results/`).
-
-* **`Codes/aes/exchange_distinguisher.c`**
-    * Implements the **5-round** exchange distinguisher.
-    * Verifies the distribution of right pairs and the formation of equivalence classes.
-    * Counts the number of detected pairs and validates the theoretical probability model.
-
-* **`Codes/aes/exchange_keyrecovery.c`**
-    * Implements the **5-round** key-recovery attack logic.
-    * Performs the 5-round key-recovery attack using the structural properties of right pairs.
-    * Verifies the filtering condition (Observation 1) and calculates the success rate of the attack.
-
-* **`Codes/small_aes/small_aes_p5.c`**
-    * Directly measures the one-round exchange probability `P_5(1,k)` on **Small-Scale AES** (4-bit cells), by checking the exact algebraic one-round exchange condition.
-    * `k = 2` corresponds to the 5-round trail and `k = 1` to the 6-round trail.
-    * Evaluates the same `P_5(1,1)` formula on Small-Scale AES, where it gives `~= 2^-17.87` (the full-AES value, `2^-38`, is infeasible to measure directly), empirically supporting the probabilistic model used for the 6-round distinguisher.
-
-* **`Makefile`** (one in each `Codes` subdirectory)
-    * Build scripts to compile the executables with the appropriate optimization flags (`-O3`, plus `-maes`, `-msse4.1` for the AES-NI code).
-
-## Prerequisites
-
-* **Compiler:** GCC (GNU Compiler Collection)
-* **Hardware:** For the full-AES code, a CPU with **AES-NI** support (most modern Intel/AMD processors). The Small-Scale AES code has no such requirement.
-* **OS:** Linux (Recommended) or macOS.
-
-## Build Instructions
-
-Each component is built from its own directory using the provided `Makefile`.
-
-1.  **Full AES (distinguisher and key recovery):**
-    ```bash
-    cd Codes/aes
-    make
-    ```
-    This command will generate two executables: `distinguisher` and `key_recovery`.
-
-2.  **Small-Scale AES (P_5 measurement):**
-    ```bash
-    cd Codes/small_aes
-    make
-    ```
-    This command will generate the executable `small_aes_p5`.
-
-3.  **(Optional) Clean up build files:**
-    ```bash
-    make clean
-    ```
+```bash
+cd Codes/aes && make          # requires AES-NI and gcc with OpenMP
+cd Codes/small_aes && make
+```
 
 ## Usage
 
-### 1. Running the Distinguisher
-To verify the equivalence class structure and the probability of the 5-round exchange distinguisher:
-
+### Small-Scale AES distinguisher
 ```bash
-./distinguisher
+./small_aes_distinguisher R M1 M2 trials seed keymode [out.csv|-] [dump_threshold]
+```
+- `R` is the number of rounds. The 0th and 1st diagonals take `M1` and `M2` distinct random
+  values; the other cells are random constants.
+- `keymode 0` uses independent random round keys, and `keymode 1` uses the same key in every
+  round.
+- Pairs that are equal on an active diagonal (degenerate pairs) are skipped. The exchanged
+  pair is looked up by index.
+- CSV output, one line per trial: `classes, trail_classes, M_S`.
+
+### Small-Scale AES key recovery
+```bash
+./small_aes_keyrecovery R M trials seed
+```
+CSV columns are described in the header of the source file. Among other fields, they record
+whether the correct key survives the previous filter (`strict_ok`) and whether it is
+recovered with the new rule (`exact2_ok`).
+
+### Full-AES distinguisher
+```bash
+./distinguisher R L trials mode seed [first_trial] [pairlog]
+```
+- `R` is the number of rounds, and each active diagonal takes `2^L` values (`L = 15` gives
+  2^30 texts).
+- `mode 0` uses a 64-bit generator with distinct values. `mode 1` uses glibc `rand()` in the
+  exact order of the previous program, so that a run with seed `S` reproduces the previous
+  program patched with `srand(S)`.
+- CSV output: `trial,mode,seed,pairs,classes,trail_classes,M_S,lambda_S,dupA,dupB,deg_collide,parity_ok,secs`.
+- With 4 rounds (every non-degenerate colliding pair is a right pair), the per-trial counts
+  were checked to coincide exactly with those of the previous program for the same seeds.
+
+### Full-AES key recovery
+```bash
+./key_recovery M attacks seed first threads          # M values per active diagonal
+./key_recovery 0 attacks seed first threads nt nf    # synthetic test: nt trail + nf random classes
 ```
 
-* **Goal:** This verifies whether the right pairs appear in even numbers (equivalence classes).
-* **Output:** The number of right pairs found in each trial (default: 100 trials).
-
-### 2. Running the Key Recovery Attack
-To verify the validity of the 5-round key-recovery attack logic:
-
+### Analysis
 ```bash
-./key_recovery
+python3 Codes/analysis/analyze_small_aes.py A=Results/small_aes/distribution/A_all.csv
+python3 Codes/analysis/analyze_full_aes.py 'Results/aes/distribution/s1_m0_*.csv'
 ```
 
-* **Goal:** This verifies the logic of the 5-round key recovery attack.
-* **Process:** It generates structures, identifies right pairs, and applies the filtering logic to check if the correct key passes and wrong keys are filtered as expected.
-* **Output:** Verification logs showing "Right Pair Found", "Correct Key PASS", and "Wrong Key" filtering statistics.
+## Small-Scale AES data sets (`Results/small_aes/distribution`)
 
-### 3. Running the Small-Scale AES P_5 Measurement
-To directly measure the one-round exchange probability `P_5(1,k)`:
+| File | Rounds | Values per diagonal | Trials | Key schedule | Seeds |
+|---|---|---|---|---|---|
+| `A_all.csv` | 5 | 2^7 | 10^6 | independent | 1001–1016 |
+| `B_all.csv` | 5 | 2^7 | 2·10^5 | same key | 2001–2008 |
+| `D64_all.csv` | 5 | 2^6 | 2·10^5 | independent | 3001–3004 |
+| `E256_all.csv` | 5 | 2^8 | 5·10^4 | independent | 4001–4004 |
+| `C5_all.csv` | 5 | 2^9 | 2·10^4 | independent | 6001–6016 |
+| `C8_all.csv` | 8 | 2^9 | 2·10^4 | independent | 5001–5016 |
 
-```bash
-./small_aes_p5 [k] [trials]
-```
-
-* **Arguments:** `k` (1 or 2; default 1) and the number of `trials` (default 2^28). The random number generator is seeded from the system clock (no seed argument), so runs started at different times draw independent samples.
-* **Goal:** This verifies the trail-probability formula `P_5(1,k)` used in the 5- and 6-round distinguishers.
-* **Output:** The expected and measured values of `P_5(1,k)` (e.g., `P_5(1,1) ~= 2^-17.87`), together with the per-weight breakdown.
-
-## Experimental Results
-
-The experimental results provided by these codes support the claims made in the paper:
-
-* **Equivalence Classes:** Right pairs are consistently found in multiples of 2.
-* **Success Probability:** The experimental success rate aligns with our refined probabilistic model (approx. 54% for the standard structure size), deviating from the previous independent trial assumption.
-* **Trail Probability (Small-Scale AES):** The measured `P_5(1,1)` matches the formula `2^-17.87` (and `P_5(1,2)` matches `2^-12.19`), supporting the probabilistic model used for the 6-round distinguisher.
+The key-recovery file `Results/small_aes/keyrecovery/KX200_all.csv` contains 10,200 attacks
+with 200 values per diagonal (seeds 9001–9012).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License; see [LICENSE](LICENSE).
