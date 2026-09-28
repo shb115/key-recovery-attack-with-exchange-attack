@@ -17,3 +17,6 @@ python3 ../analysis/analyze_full_aes.py "$OUT/distribution/s1_m0_*.csv" "$OUT/di
 # 5-round key recovery, D = 2^31.18 per structure (M = 49312 values per diagonal), 20 attacks
 for p in 0 1 2 3 4; do nice -n 10 ./key_recovery 49312 4 20260929 $((p*4)) 4 > $OUT/keyrecovery/e4_p$p.csv 2> $OUT/logs/e4_p$p.err & done
 wait
+# 200 further attacks (ids 20-219)
+for p in $(seq 0 19); do nice -n 10 ./key_recovery 49312 10 20260929 $((20+p*10)) 4 > $OUT/keyrecovery/e5_p$p.csv 2> $OUT/logs/e5_p$p.err & done
+wait
