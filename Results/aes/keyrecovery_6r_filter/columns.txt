@@ -1,0 +1,1 @@
+trial,seed,correct_ok,log2_p_wrong_pair0,log2_p_wrong_pair1,log2_p_wrong_geomean,log2_cand_two_pairs,true_in_cand,secs

@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -O3 -maes -mssse3 -msse4.1 -Wall
 
-all: distinguisher key_recovery
+all: distinguisher key_recovery key_recovery_6r_filter
 
 distinguisher: exchange_distinguisher.c
 	$(CC) $(CFLAGS) -o $@ $<
@@ -12,7 +12,10 @@ distinguisher: exchange_distinguisher.c
 key_recovery: exchange_keyrecovery.c
 	$(CC) $(CFLAGS) -fopenmp -o $@ $< -lm
 
+key_recovery_6r_filter: exchange_keyrecovery_6r_filter.c
+	$(CC) $(CFLAGS) -fopenmp -o $@ $< -lm
+
 clean:
-	rm -f distinguisher key_recovery
+	rm -f distinguisher key_recovery key_recovery_6r_filter
 
 .PHONY: all clean

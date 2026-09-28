@@ -31,6 +31,9 @@ Codes/
     exchange_keyrecovery.c      end-to-end 5-round key recovery (two structures), exact
                                 pattern filter, ranked candidates, known-pair verification;
                                 M = 0 runs a synthetic test of the filter
+    exchange_keyrecovery_6r_filter.c  6-round key filtering (Observation 2) verified with
+                                synthetic right class pairs: wrong-key pass rate and
+                                candidates left by two right class pairs
     lambda_structure.py         exact lambda_S of random full-AES structures without
                                 encryption (also with the glibc / MSVCRT rand() streams)
     legacy/                     code of the previous version of the paper
@@ -53,6 +56,7 @@ Results/
   aes/lambda_structure/         exact lambda_S of random full-AES structures
   aes/distribution/             full-AES distinguisher runs
   aes/keyrecovery/              full-AES key-recovery runs
+  aes/keyrecovery_6r_filter/    6-round key-filtering verification
   aes/previous_100_trials/      results of the previous version (100 trials)
 ```
 
@@ -103,6 +107,13 @@ recovered with the new rule (`exact2_ok`).
 ./key_recovery M attacks seed first threads          # M values per active diagonal
 ./key_recovery 0 attacks seed first threads nt nf    # synthetic test: nt trail + nf random classes
 ```
+
+### 6-round key filtering
+```bash
+./key_recovery_6r_filter trials seed threads
+```
+For each trial, two right class pairs of the 6-round attack are generated under a random key and
+the filtering of Observation 2 is run over all guesses of the three active diagonals.
 
 ### Analysis
 ```bash
