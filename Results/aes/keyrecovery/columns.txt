@@ -1,0 +1,1 @@
+attack,seed,M,n0,f0,n1,f1,cons0,cons1,cand0,cand1,top0,ntop0,nge0,top1,ntop1,nge1,log2_total,log2_tiered,found,weak_strict_ok,secs
