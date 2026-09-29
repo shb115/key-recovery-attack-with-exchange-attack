@@ -20,6 +20,9 @@ for s in $(seq 1 16); do ./small_aes_distinguisher 5 512 512 1250 $((6000+s)) 0 
 # Key recovery: 10,200 attacks, 200 values per diagonal (lambda_T ~ 4.45 per structure)
 K=$OUT/keyrecovery/runs
 for s in $(seq 1 12); do ./small_aes_keyrecovery 5 200 850 $((9000+s)) > $K/KX200_$s.csv & done; wait
+# Key recovery at the parameters of the attack: 10,200 attacks, 181 values per diagonal (lambda_T ~ 3.03 per structure)
+for s in $(seq 1 12); do ./small_aes_keyrecovery 5 181 850 $((9100+s)) > $K/KX181_$s.csv & done; wait
 for x in A B D64 E256 C8 C5; do cat $D/${x}_*.csv > $OUT/distribution/${x}_all.csv; done
 cat $K/KX200_*.csv > $OUT/keyrecovery/KX200_all.csv
+cat $K/KX181_*.csv > $OUT/keyrecovery/KX181_all.csv
 python3 ../analysis/analyze_small_aes.py A=$OUT/distribution/A_all.csv
