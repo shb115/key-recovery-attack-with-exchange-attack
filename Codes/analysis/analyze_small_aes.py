@@ -7,7 +7,7 @@ Usage:
     python3 analyze_small_aes.py <label>=<glob> [<label>=<glob> ...]
     e.g. python3 analyze_small_aes.py A='../../Results/small_aes/distribution/A_all.csv'
 
-For each data set it prints the histogram, mean, variance, index of dispersion,
+For each data set it prints the histogram, mean, variance, variance-to-mean ratio,
 the chi-square test against a single Poisson distribution (fitted mean) and
 against the mixed Poisson distribution given by the per-trial value
 lambda_S = M * q + lambda_rand (q = 2^-14, lambda_rand = measured non-trail rate),
@@ -41,7 +41,7 @@ def pooled_chi2(obs, exp, nfit):
 def report(label, d, q=2.0 ** -14):
     c, t, M = d[:, 0], d[:, 1], d[:, 2]
     n = len(c); m = c.mean(); v = c.var(ddof=1)
-    print(f'==== {label}: n = {n}, mean = {m:.5f}, var = {v:.5f}, index of dispersion = {v / m:.4f}')
+    print(f'==== {label}: n = {n}, mean = {m:.5f}, var = {v:.5f}, variance-to-mean ratio = {v / m:.4f}')
     kmax = int(c.max())
     obs = np.bincount(c, minlength=kmax + 1).astype(float)
     lam_rand = (c - t).mean()
@@ -57,7 +57,7 @@ def report(label, d, q=2.0 ** -14):
     chi_p, dof_p, p_p = pooled_chi2(obs, poi, 1)
     print(f'chi2 vs mixed Poisson (no fitted parameter): {chi_m:.2f} (df {dof_m}, p = {p_m:.3g})')
     print(f'chi2 vs Poisson (fitted mean):               {chi_p:.2f} (df {dof_p}, p = {p_p:.3g})')
-    print(f'predicted mean {lam_t.mean():.5f}, predicted index of dispersion {1 + lam_t.var() / lam_t.mean():.4f}')
+    print(f'predicted mean {lam_t.mean():.5f}, predicted variance-to-mean ratio {1 + lam_t.var() / lam_t.mean():.4f}')
     print(f'success P(>=1): observed {np.mean(c > 0):.4f}, predicted {1 - np.exp(-lam_t).mean():.4f}')
     if t.sum():
         print(f'measured q = {t.sum() / M.sum():.4e} (2^{np.log2(t.sum() / M.sum()):.3f}); '
@@ -67,7 +67,7 @@ def report(label, d, q=2.0 ** -14):
             sel = (M >= a) & (M <= b)
             tt = t[sel]
             print(f'  M in [{a:.0f}, {b:.0f}]: n = {sel.sum()}, trail mean = {tt.mean():.4f}, '
-                  f'predicted = {M[sel].mean() * q:.4f}, index of dispersion = {tt.var(ddof=1) / tt.mean():.4f}')
+                  f'predicted = {M[sel].mean() * q:.4f}, variance-to-mean ratio = {tt.var(ddof=1) / tt.mean():.4f}')
 
 
 if __name__ == '__main__':

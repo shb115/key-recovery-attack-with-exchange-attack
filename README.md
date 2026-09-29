@@ -43,7 +43,7 @@ Codes/
     small_aes_r2_diagnostic.c   zero cells / diagonals of the 2-round difference of detected pairs
     small_aes_p5.c              direct measurement of the one-round probability P_5(1,k)
   analysis/
-    analyze_small_aes.py        histogram, index of dispersion, chi-square tests
+    analyze_small_aes.py        histogram, variance-to-mean ratio, chi-square tests
                                 (single Poisson and mixed Poisson), conditional analysis
     analyze_full_aes.py         the same for full AES, with tests using the known lambda_S
 scripts/
@@ -55,7 +55,7 @@ Results/
   small_aes/p5/                 P_5(1,k) measurements
   aes/lambda_structure/         exact lambda_S of random full-AES structures
   aes/distribution/             full-AES distinguisher runs
-  aes/keyrecovery/              full-AES key-recovery runs
+  aes/keyrecovery/              full-AES key-recovery runs (e4_*, e5_*, e6_*: 520 attacks, ids 0-519)
   aes/keyrecovery_6r_filter/    6-round key-filtering verification
   aes/previous_100_trials/      results of the previous version (100 trials)
 ```

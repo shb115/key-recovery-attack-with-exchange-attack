@@ -20,3 +20,6 @@ wait
 # 200 further attacks (ids 20-219)
 for p in $(seq 0 19); do nice -n 10 ./key_recovery 49312 10 20260929 $((20+p*10)) 4 > $OUT/keyrecovery/e5_p$p.csv 2> $OUT/logs/e5_p$p.err & done
 wait
+# 300 further attacks (ids 220-519)
+for p in $(seq 0 19); do nice -n 10 ./key_recovery 49312 15 20260929 $((220+p*15)) 4 > $OUT/keyrecovery/e6_p$p.csv 2> $OUT/logs/e6_p$p.err & done
+wait
