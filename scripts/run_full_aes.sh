@@ -23,3 +23,6 @@ wait
 # 300 further attacks (ids 220-519)
 for p in $(seq 0 19); do nice -n 10 ./key_recovery 49312 15 20260929 $((220+p*15)) 4 > $OUT/keyrecovery/e6_p$p.csv 2> $OUT/logs/e6_p$p.err & done
 wait
+# 400 attacks at the parameters of the attack: M = 44720 values per diagonal (D = 2^30.90, lambda_T = 3), ids 0-399
+for p in $(seq 0 19); do nice -n 10 ./key_recovery 44720 20 20260930 $((p*20)) 4 > $OUT/keyrecovery/e7_p$p.csv 2> $OUT/logs/e7_p$p.err & done
+wait
