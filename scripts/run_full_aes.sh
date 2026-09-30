@@ -13,7 +13,7 @@ mkdir -p $OUT/distribution $OUT/keyrecovery $OUT/keyrecovery_6r_filter $OUT/lamb
 for p in $(seq 0 29); do nice -n 10 ./distinguisher 5 15 17 0 20260928 $((p*17)) 1 > $OUT/distribution/s1_m0_p$p.csv 2> $OUT/logs/s1_m0_p$p.err & done
 for p in $(seq 0 29); do nice -n 10 ./distinguisher 5 15 17 1 $((1000001+p)) 0 1 > $OUT/distribution/s1_m1_p$p.csv 2> $OUT/logs/s1_m1_p$p.err & done
 wait
-python3 ../analysis/analyze_full_aes.py "$OUT/distribution/s1_m0_*.csv" "$OUT/distribution/s1_m1_*.csv"
+python3 ../analysis/analyze_full_aes.py "$OUT/distribution/s1_m*.csv"
 # 5-round key recovery, D = 2^31.18 per structure (M = 49312 values per diagonal), 20 attacks
 for p in 0 1 2 3 4; do nice -n 10 ./key_recovery 49312 4 20260929 $((p*4)) 4 > $OUT/keyrecovery/e4_p$p.csv 2> $OUT/logs/e4_p$p.err & done
 wait
@@ -26,8 +26,8 @@ wait
 # 400 attacks at the parameters of the attack: M = 44720 values per diagonal (D = 2^30.90, lambda_T = 3), ids 0-399
 for p in $(seq 0 19); do nice -n 10 ./key_recovery 44720 20 20260930 $((p*20)) 4 > $OUT/keyrecovery/e7_p$p.csv 2> $OUT/logs/e7_p$p.err & done
 wait
-python3 ../analysis/summarize_keyrecovery.py
 # 6-round key filtering on synthetic right classes (Section 4.4), 200 keys
 ./key_recovery_6r_filter 200 20260930 8 > $OUT/keyrecovery_6r_filter/kr6f.csv 2> $OUT/logs/kr6f.err
+python3 ../analysis/summarize_keyrecovery.py
 # exact lambda_S of 2,000 random structures (Section 3.3.2, standard deviation 0.031)
 python3 lambda_structure.py good 2000 7 > $OUT/lambda_structure/FL_good.csv

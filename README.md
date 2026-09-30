@@ -66,7 +66,7 @@ Results/
 | Table 2 (Small-AES distribution, 10^6 trials) | `Results/small_aes/distribution/A_all.csv` | `small_aes_distinguisher`, `analyze_small_aes.py` |
 | Table 3 (full AES, 1,020 trials) | `Results/aes/distribution/s1_m0_*.csv`, `s1_m1_*.csv` | `distinguisher`, `analyze_full_aes.py` |
 | Standard deviation 0.031 of lambda_S (Section 3.3.2) | `Results/aes/lambda_structure/FL_good.csv` (2,000 structures; the 1,020 trials of Table 3 give 0.030) | `lambda_structure.py good 2000 7` |
-| P*_5(1,1) on Small-AES (Section 3.4) | `Results/small_aes/p5/small_aes_P5_1_1_2p32_seed20260930.txt` (`P[at least one valid mask]`) | `small_aes_p5 1 4294967296 20260930` |
+| P*_5(1,1) and P*_5(1,2) on Small-AES (Section 3.4) | `Results/small_aes/p5/small_aes_P5_1_1_2p32_seed20260930.txt`, `small_aes_P5_1_2_2p30_seed20260930.txt` (`P[at least one valid mask]`) | `small_aes_p5 1 4294967296 20260930`, `small_aes_p5 2 1073741824 20260930` |
 | Small-AES key recovery, 10,200 attacks, 181 values per diagonal (Section 4.3) | `Results/small_aes/keyrecovery/KX181_all.csv` | `small_aes_keyrecovery` |
 | Full-AES key recovery, 400 attacks, M = 44720 (D = 2^30.90 per structure) | `Results/aes/keyrecovery/e7_*.csv` | `key_recovery` |
 | Full-AES key recovery, 520 attacks, M = 49312 (D = 2^31.18 per structure) | `Results/aes/keyrecovery/e4_*.csv`, `e5_*.csv`, `e6_*.csv` | `key_recovery` |
@@ -100,8 +100,9 @@ programs run in minutes on one core.
 - Only pairs that differ in every active diagonal are considered; the exchanged pair is looked
   up by index.
 - CSV output, one line per trial (no header): `classes, right_classes, N_rc`.
-- The stdout summary of each run (written by `scripts/run_small_aes.sh` to `runs/*.txt`) reports
-  `parity_viol=0`, i.e., no trial with an odd number of detected pairs (Section 3.3.1).
+- The program also prints a summary with the number of trials that contained an odd number of
+  detected pairs (`parity_viol`); it was 0 in all our runs (Section 3.3.1). These stdout summaries are
+  not included in the repository; rerunning `scripts/run_small_aes.sh` regenerates them under `runs/`.
 
 ### Small-AES key recovery
 ```bash
@@ -158,7 +159,7 @@ the filtering of Observation 2 is run over all 2^32 guesses of each active diago
 ### Analysis
 ```bash
 python3 Codes/analysis/analyze_small_aes.py A=Results/small_aes/distribution/A_all.csv
-python3 Codes/analysis/analyze_full_aes.py 'Results/aes/distribution/s1_m0_*.csv' 'Results/aes/distribution/s1_m1_*.csv'
+python3 Codes/analysis/analyze_full_aes.py "Results/aes/distribution/s1_m*.csv"   # pooled 1,020 trials (Table 3)
 ```
 
 ## Small-AES data sets (`Results/small_aes/distribution`)

@@ -25,4 +25,8 @@ for s in $(seq 1 12); do ./small_aes_keyrecovery 5 181 850 $((9100+s)) > $K/KX18
 for x in A B D64 E256 C8 C5; do cat $D/${x}_*.csv > $OUT/distribution/${x}_all.csv; done
 cat $K/KX200_*.csv > $OUT/keyrecovery/KX200_all.csv
 cat $K/KX181_*.csv > $OUT/keyrecovery/KX181_all.csv
+# exact one-round probabilities P*_5(1,1) and P*_5(1,2) (Section 3.4)
+mkdir -p $OUT/p5
+./small_aes_p5 1 4294967296 20260930 > $OUT/p5/small_aes_P5_1_1_2p32_seed20260930.txt
+./small_aes_p5 2 1073741824 20260930 > $OUT/p5/small_aes_P5_1_2_2p30_seed20260930.txt
 python3 ../analysis/analyze_small_aes.py A=$OUT/distribution/A_all.csv
