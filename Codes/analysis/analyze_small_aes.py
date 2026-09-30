@@ -1,4 +1,4 @@
-"""Analysis of the Small-Scale AES distinguisher runs (small_aes_distinguisher).
+"""Analysis of the Small-AES distinguisher runs (small_aes_distinguisher).
 
 CSV columns per trial: classes, trail_classes, M  (M = #classes of the structure
 satisfying the one-round exchange condition, Eq. (1) of the paper).

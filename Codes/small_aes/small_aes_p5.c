@@ -20,21 +20,25 @@
  * one-round propagations are combinatorial zero-byte counts.
  *
  * Setup for P_5(1,k):
- *   - a, b agree on k inactive diagonals and differ on (4-k) active ones.
+ *   - a, b agree on k inactive diagonals and differ on each of the (4-k) active
+ *     ones (a trial in which a and b agree on an active diagonal is resampled,
+ *     as required of the pairs of the paper).
  *   - a' = rho_d^{(1,0,0,0)}(a,b), b' = rho_d^{(1,0,0,0)}(b,a)
  *     (exchange the active diagonal 0).
  *   - apply one round R = AK; SubNibbles; ShiftRows; MixColumns.
  *   - check whether (R(a'), R(b')) is a diagonal exchange of (R(a), R(b)).
  *
- * Expected values (Small-AES, c=4):
+ * Expected values (Small-AES, c=4), union bounds P_5(1,k) of the paper:
  *   P_5(1,1) = 4*2^-20 + 6*2^-24 + 4*2^-28 ~= 2^-17.87   (6-round trail)
  *   P_5(1,2) = 14*2^-16                    ~= 2^-12.19   (5-round trail)
+ * The exact probabilities P*_5(1,k) that Eq. (1) holds for some v' (Section 2.2.2
+ * of the paper) are 2^-17.97 and 2^-12.40; they are the quantity reported as
+ * "P[at least one valid mask]" below, while "E[# valid masks]" equals the union
+ * bound by linearity.
  *
  * Usage:
- *   ./small_aes_p5 [k] [trials]
- *   Defaults: k=1, trials=268435456 (2^28). The RNG is seeded from the system
- *   clock (no seed argument); runs started at different times draw independent
- *   samples.
+ *   ./small_aes_p5 [k] [trials] [seed]
+ *   Defaults: k=1, trials=268435456 (2^28), seed = system clock.
  */
 
 #include <stdio.h>
@@ -149,7 +153,9 @@ int main(int argc, char **argv) {
      * as well as plaintexts (reduces run-to-run variance). The RNG is seeded
      * from the system clock, matching the full-AES code. */
     NibSrc ns; ns.pool = 0; ns.cnt = 0;
-    ns.st = ((uint64_t)time(NULL) ^ 0x9E3779B97F4A7C15ULL) | 1ULL;
+    uint64_t seed = (argc > 3) ? strtoull(argv[3], NULL, 10) : (uint64_t)time(NULL);
+    ns.st = (seed ^ 0x9E3779B97F4A7C15ULL) | 1ULL;
+    printf("    Seed             : %llu\n\n", (unsigned long long)seed);
     uint8_t K[4][4];
     for (int r = 0; r < 4; r++) for (int col = 0; col < 4; col++) K[r][col] = nib(&ns);
 
@@ -167,11 +173,17 @@ int main(int argc, char **argv) {
 
         for (int d = 0; d < 4; d++) {
             if (d < num_active) {
-                /* active diagonal: independent random values for A and B */
-                for (int r = 0; r < 4; r++) {
-                    A[r][(r + d) & 3] = nib(&ns);
-                    B[r][(r + d) & 3] = nib(&ns);
-                }
+                /* active diagonal: independent random values for A and B,
+                 * resampled until the two diagonals differ */
+                int same;
+                do {
+                    same = 1;
+                    for (int r = 0; r < 4; r++) {
+                        A[r][(r + d) & 3] = nib(&ns);
+                        B[r][(r + d) & 3] = nib(&ns);
+                        if (A[r][(r + d) & 3] != B[r][(r + d) & 3]) same = 0;
+                    }
+                } while (same);
             } else {
                 /* inactive diagonal: identical in A and B */
                 for (int r = 0; r < 4; r++) {
@@ -262,7 +274,7 @@ int main(int argc, char **argv) {
                exp_j[j], log2(exp_j[j]),
                exp_j[j] > 0 ? obsj / exp_j[j] : 0.0);
     }
-    printf("\n[2] P[at least one valid mask] (operational trail probability)\n");
+    printf("\n[2] P[at least one valid mask] = exact probability P*_5(1,%d) of Eq. (1)\n", k);
     printf("    observed  : %.6e  (2^%.4f)\n",
            p_exist, (p_exist > 0 ? log2(p_exist) : -999.0));
     printf("    note: <= formula because the formula is a union-bound sum;\n");

@@ -1,7 +1,10 @@
-"""Analysis of full-AES exd5 runs.
+"""Analysis of the full-AES distinguisher runs (Table 3 of the paper).
 
-CSV columns: trial,mode,seed,pairs,classes,trail_classes,M_S,lambda_S,dupA,dupB,deg_collide,parity_ok,secs
-Usage: python3 analyze_full.py 'runs/s1_m0_*.csv' ['runs/s1_m1_*.csv' ...]
+CSV columns: trial,mode,seed,pairs,classes,right_classes,N_rc,lambda_S,dupA,dupB,deg_collide,parity_ok,secs
+(the code names right_classes and N_rc 'trail_classes' and 'M_S').
+Usage: python3 analyze_full_aes.py "Results/aes/distribution/s1_m*.csv"
+Prints the histogram against the mixed Poisson prediction (lambda_S of each trial) and against a single
+Poisson distribution with the observed mean, with the chi-square goodness-of-fit tests of Table 3.
 """
 import sys, glob
 import numpy as np
@@ -44,9 +47,11 @@ def report(pattern):
     obs = np.bincount(x, minlength=kmax + 1)
     exp = np.array([stats.poisson.pmf(k, lam).sum() for k in range(kmax + 1)])
     exp[-1] += stats.poisson.sf(kmax, lam).sum()
-    print(' k   obs    exp(mixed Poisson)')
+    poi = stats.poisson.pmf(np.arange(kmax + 1), m) * n
+    poi[-1] += stats.poisson.sf(kmax, m) * n
+    print(' k   obs    exp(mixed Poisson)  exp(Poisson, observed mean)')
     for k in range(kmax + 1):
-        print(f'{k:2d} {obs[k]:6d} {exp[k]:10.2f}')
+        print(f'{k:2d} {obs[k]:6d} {exp[k]:10.2f} {poi[k]:14.2f}')
     # pooled chi-square (expected >= 5)
     o_, e_, ao, ae = [], [], 0, 0
     for k in range(kmax + 1):
@@ -58,6 +63,16 @@ def report(pattern):
     chi = sum((a - b) ** 2 / b for a, b in zip(o_, e_))
     print(f'GoF vs mixed Poisson (no fitted params): chi2 = {chi:.2f}, df = {len(o_) - 1}, '
           f'p = {stats.chi2.sf(chi, len(o_) - 1):.3g}')
+    o_, e_, ao, ae = [], [], 0, 0
+    for k in range(kmax + 1):
+        ao += obs[k]; ae += poi[k]
+        if ae >= 5:
+            o_.append(ao); e_.append(ae); ao = ae = 0
+    if ae > 0:
+        o_[-1] += ao; e_[-1] += ae
+    chi = sum((a - b) ** 2 / b for a, b in zip(o_, e_))
+    print(f'GoF vs Poisson (observed mean):          chi2 = {chi:.2f}, df = {len(o_) - 2}, '
+          f'p = {stats.chi2.sf(chi, len(o_) - 2):.3g}')
     tail = (x >= 6).sum(); etail = stats.poisson.sf(5, lam).sum()
     print(f'tail: trials with >=6 classes: obs {tail}, exp {etail:.2f}')
     s = (x > 0).mean(); ps = 1 - np.exp(-lam).mean()

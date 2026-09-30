@@ -1,11 +1,11 @@
 /*
- * exchange_distinguisher.c -- fast full-AES exchange distinguisher experiment (re-implementation
- * of exchange_distinguisher.c for large trial counts).
+ * exchange_distinguisher.c -- full-AES 5-round exchange distinguisher experiment of Section 3.3.2
+ * (re-implementation of legacy/exchange_distinguisher_v1.c for large trial counts).
  *
  * Structure: diagonal 0 (bytes 0,5,10,15) takes M = 2^L values A[i], diagonal 1
  * (bytes 3,4,9,14) takes M values B[j], the other bytes are a random constant.
  * Text index idx = (i << L) | j.  For each of the 4 inverse diagonals (the
- * PASSIVE_SETS of the original code) we find all colliding pairs, skip pairs
+ * PASSIVE_SETS of legacy/exchange_distinguisher_v1.c) we find all colliding pairs, skip pairs
  * that are equal on diagonal 0 or on diagonal 1 (value comparison, exactly as
  * the flag0/flag1 test of the original), and test the diagonal-1-exchanged pair
  * ((i1,j2),(i2,j1)) by table lookup instead of re-encryption.
@@ -17,10 +17,10 @@
  *       replacement), so a run with seed S reproduces the original binary
  *       patched with srand(S).
  *
- * Per trial it also computes, without encryption, M_S = number of classes of the
- * structure satisfying the one-round exchange condition Eq.(1) under the real
- * k0, and lambda_S = M_S*q + #classes*2^-62, and classifies every detected class
- * as trail / non-trail.
+ * Per trial it also computes, without encryption, N_rc (called M_S in the code) =
+ * number of classes of the structure satisfying the one-round exchange condition
+ * Eq.(1) under the real k0, and lambda_S = N_rc*q + #classes*2^-62, and labels
+ * every detected class as right / not right ("trail" / "non-trail" in the code).
  *
  * Usage: distinguisher R L trials mode seed [first_trial] [pairlog_threshold]
  * Output (stdout, one CSV line per trial):

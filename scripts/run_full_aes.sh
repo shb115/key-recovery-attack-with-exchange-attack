@@ -1,12 +1,12 @@
 #!/bin/bash
-# Full-AES experiments of Section 3.3.2 and Section 4.3 (Linux, AES-NI, gcc + OpenMP).
+# Full-AES experiments of Sections 3.3.2, 4.3 and 4.4 (Linux, AES-NI, gcc + OpenMP).
 # Memory: about 21 GB per distinguisher process (2^30 texts) and about 49 GB per
 # key-recovery process (2^31.18 texts per structure). Adjust the numbers of
 # parallel processes to the machine.
 set -e
 cd "$(dirname "$0")/../Codes/aes" && make
 OUT=../../Results/aes
-mkdir -p $OUT/distribution $OUT/keyrecovery $OUT/logs
+mkdir -p $OUT/distribution $OUT/keyrecovery $OUT/keyrecovery_6r_filter $OUT/lambda_structure $OUT/logs
 # 5-round distinguisher, D = 2^30:
 #  mode 0: 64-bit generator, distinct diagonal values, trial ids p*17 .. p*17+16 (seed 20260928)
 #  mode 1: glibc rand() in the order of the previous experiment, srand(1000001+p)
@@ -26,3 +26,8 @@ wait
 # 400 attacks at the parameters of the attack: M = 44720 values per diagonal (D = 2^30.90, lambda_T = 3), ids 0-399
 for p in $(seq 0 19); do nice -n 10 ./key_recovery 44720 20 20260930 $((p*20)) 4 > $OUT/keyrecovery/e7_p$p.csv 2> $OUT/logs/e7_p$p.err & done
 wait
+python3 ../analysis/summarize_keyrecovery.py
+# 6-round key filtering on synthetic right classes (Section 4.4), 200 keys
+./key_recovery_6r_filter 200 20260930 8 > $OUT/keyrecovery_6r_filter/kr6f.csv 2> $OUT/logs/kr6f.err
+# exact lambda_S of 2,000 random structures (Section 3.3.2, standard deviation 0.031)
+python3 lambda_structure.py good 2000 7 > $OUT/lambda_structure/FL_good.csv

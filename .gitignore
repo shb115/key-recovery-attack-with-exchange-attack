@@ -1,6 +1,7 @@
 # Build outputs (Makefile targets)
 /Codes/aes/distinguisher
 /Codes/aes/key_recovery
+/Codes/aes/key_recovery_6r_filter
 /Codes/small_aes/small_aes_distinguisher
 /Codes/small_aes/small_aes_keyrecovery
 /Codes/small_aes/small_aes_r2_diagnostic

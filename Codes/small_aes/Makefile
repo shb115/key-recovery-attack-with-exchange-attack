@@ -1,4 +1,4 @@
-# Small-Scale AES experiments (4-bit cells); no special instruction set needed.
+# Small-AES experiments (4-bit cells); no special instruction set needed.
 CC = gcc
 CFLAGS = -O3 -Wall
 LDFLAGS = -lm

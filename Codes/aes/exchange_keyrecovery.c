@@ -1,12 +1,14 @@
 /*
  * exchange_keyrecovery.c -- end-to-end key recovery on 5-round AES from exchange classes.
  *
- * Revised Algorithm 3: exact one-round pattern filter (Eq.(1) <=> one of 14
- * coupled zero patterns in the two active columns after the first MC) and the
- * rule "keep a key pair consistent with >= 2 detected classes", which tolerates
- * false (non-trail) classes.  The paper's original rule (weak test "at least one
- * zero byte in each active column", all classes must pass) is evaluated on the
- * true key for comparison.
+ * Algorithm 3 of the paper: exact one-round pattern filter (Eq.(1) <=> one of 14
+ * zero patterns of Observation 1 in the two active columns after the first MC)
+ * and the key-candidate selection rule "candidates = guesses with count >= 2,
+ * ranked by count", where the count of a guess is the number of detected classes
+ * whose pattern it satisfies; the rule tolerates detected classes that are not
+ * right classes.  The weak test of the previously submitted version ("at least
+ * one zero byte in each active column", all classes must pass) is evaluated on
+ * the true key for comparison (column weak_strict_ok).
  *
  * Structure s=0: diagonals 0,1 active, exchange diagonal 1 -> k0 diagonals 0,1
  * Structure s=1: diagonals 2,3 active, exchange diagonal 3 -> k0 diagonals 2,3
@@ -17,12 +19,13 @@
  * Output (CSV per attack):
  *  attack,seed,M,n0,f0,n1,f1,cons0,cons1,cand0,cand1,top0,ntop0,nge0,top1,ntop1,nge1,
  *  log2_total,log2_tiered,found,weak_strict_ok,secs
- *  n = detected classes, f = non-trail classes, cons = #classes consistent with
- *  the true key under the exact filter, cand = size of the union candidate list
- *  for the 64 key bits of the structure, top/ntop = highest consistency count and
- *  its multiplicity, nge = #candidates ranked at least as high as the true key
- *  (tiered-search cost factor), found = true key recovered (verified with a known
- *  pair when the union product is <= 2^28, otherwise = present in both lists).
+ *  n = detected classes, f = detected classes that are not right classes,
+ *  cons = count of the true key (number of detected classes whose pattern it
+ *  satisfies), cand = size of the candidate list for the 64 key bits of the
+ *  structure, top/ntop = highest count and its multiplicity, nge = #candidates
+ *  ranked at least as high as the true key (cost of the ranked search),
+ *  found = true key recovered (by trial encryption of one of the chosen
+ *  plaintexts when |L0|*|L1| <= 2^28, otherwise = present in both lists).
  */
 #include <stdint.h>
 #include <stdio.h>
@@ -351,7 +354,7 @@ int main(int argc, char **argv) {
                 cons[s] += V[s][zx][zy];
                 if (zx == 0 || zy == 0) weak_ok = 0;
             }
-        /* candidate lists (union over class pairs) and tiers by number of consistent classes */
+        /* candidate lists (union over pairs of detected classes) and tiers by count */
         uint64_t nc[2] = {0, 0}; uint64_t *C[2] = {NULL, NULL}; int intrue[2] = {0, 0};
         int top[2] = {0, 0}; uint64_t ntop[2] = {0, 0}, nge[2] = {0, 0};
         for (int s = 0; s < 2; s++) {

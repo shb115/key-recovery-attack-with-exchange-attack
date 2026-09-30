@@ -1,3 +1,4 @@
+/* Program of the previously submitted version, kept for reference; superseded by ../exchange_distinguisher.c. */
 /*
  * exchangeattack.c
  * - Standalone Version for GCC/Linux/WSL

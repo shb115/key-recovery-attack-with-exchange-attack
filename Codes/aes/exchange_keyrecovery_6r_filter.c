@@ -1,10 +1,10 @@
 /*
  * exchange_keyrecovery_6r_filter.c -- verification of the key filtering of the
- * 6-round attack (Algorithm 4) with synthetic right class pairs.
+ * 6-round attack (Algorithm 4) with synthetic right classes.
  *
  * The 6-round distinguisher itself (2^89 data) cannot be run, but the key
- * filtering only needs the plaintext pairs of right class pairs.  A right class
- * pair of the 6-round attack is a pair (alpha, beta) with three active diagonals
+ * filtering only needs the two detected pairs of a right class.  Such a pair is
+ * represented here by a pair (alpha, beta) with three active diagonals
  * (e, o1, o2) = (0, 1, 2) that satisfies the one-round exchange condition for
  * the exchange of diagonal e.  Under the correct k0 this means (Observation 2):
  * for some J with {} != J != {0,1,2,3},
@@ -12,14 +12,14 @@
  *     Delta[(o-d) mod 4, o] = 0 for all d in J, o in {o1, o2},
  * where Delta = R(alpha) ^ R(beta) (difference after the first MC).
  *
- * For each trial: draw a random k0, sample right class pairs by rejection
- * (random diagonal values, keep those satisfying the condition under k0), then
- *  (a) check that the correct key is consistent with every right class pair;
+ * For each trial: draw a random k0, sample right classes by rejection
+ * (random diagonal values, keep the pairs satisfying the condition under k0), then
+ *  (a) check that the correct key satisfies the condition of every right class;
  *  (b) measure the probability that a random wrong guess of the three active
- *      diagonals (96 bits) is consistent with one right class pair
+ *      diagonals (96 bits) satisfies the condition of one right class
  *      -- expected P*_5(1,1) = 2^-38, measured per-column and combined;
- *  (c) enumerate, with the MITM tables, all guesses of the three active
- *      diagonals consistent with TWO right class pairs (any J1, J2), and count
+ *  (c) find, with the MITM tables, all guesses of the three active diagonals
+ *      that satisfy the conditions of TWO right classes (any J1, J2), and count
  *      them -- expected about 2^96 * (2^-38)^2 = 2^20 random survivors plus the
  *      "partially correct" guesses, and verify the correct key is among them.
  *
@@ -28,8 +28,8 @@
  *   trial,seed,correct_ok,log2_p_wrong_pair0,log2_p_wrong_pair1,log2_p_wrong_geomean,
  *   log2_cand_two_pairs,true_in_cand,secs
  *   (p_wrong = probability that a random 96-bit guess is consistent with the
- *   given right class pair, expected 2^-38; cand = number of 96-bit guesses
- *   consistent with both right class pairs, expected about 2^20 plus partially
+ *   given right class, expected 2^-38; cand = number of 96-bit guesses
+ *   satisfying both right classes, expected about 2^20 plus partially
  *   correct guesses.)
  */
 #include <stdint.h>
@@ -93,7 +93,7 @@ static inline int consistent(int ze, int z1, int z2) {
 
 typedef struct { uint32_t x[3], y[3]; } rcp_t;   /* diagonal values (e,o1,o2) of the two plaintexts */
 
-/* guesses of one 32-bit diagonal whose column zero-mask, for the two class pairs c1,c2, is (m1,m2): count via full scan (2^32 with tables, threaded) */
+/* guesses of one 32-bit diagonal whose column zero-mask, for the two right classes c1,c2, is (m1,m2): count via full scan (2^32 with tables, threaded) */
 static uint64_t scan_col_pairs(const rcp_t *a, const rcp_t *b, int col, uint64_t hist[256], uint32_t truekey, int *true_bucket) {
     /* hist[m1*16+m2] = number of guesses g with zmask(colimg(x^g)^colimg(x'^g)) = m1 for a, = m2 for b */
     uint32_t DTa[4][256], DTb[4][256];
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
         struct timespec t0, t1; clock_gettime(CLOCK_MONOTONIC, &t0);
         sm_s = seed * 0x100000001B3ULL ^ (uint64_t)t * 0xD6E8FEB86659FD93ULL; sm64(); sm64();
         uint32_t k[3]; for (int c = 0; c < 3; c++) k[c] = (uint32_t)sm64();
-        /* sample two right class pairs by rejection: about 2^38 draws each is too many, so
+        /* sample two right classes by rejection: about 2^38 draws each is too many, so
            sample column e first (its zero rows fix J), then draw o-columns until they match */
         rcp_t rc[2];
         for (int i = 0; i < 2; i++) {
@@ -166,10 +166,10 @@ int main(int argc, char **argv) {
             int z[3]; for (int c = 0; c < 3; c++) z[c] = zmask32(colimg(rc[i].x[c] ^ k[c]) ^ colimg(rc[i].y[c] ^ k[c]));
             if (!consistent(z[0], z[1], z[2])) correct_ok = 0;
         }
-        /* (b)+(c): per-column zero-mask histograms over all 2^32 guesses, for both class pairs jointly */
+        /* (b)+(c): per-column zero-mask histograms over all 2^32 guesses, for both right classes jointly */
         uint64_t H[3][256]; int tb[3];
         for (int c = 0; c < 3; c++) scan_col_pairs(&rc[0], &rc[1], c, H[c], k[c], &tb[c]);
-        /* probability that a random 96-bit guess is consistent with class pair 0 (and with pair 1) */
+        /* probability that a random 96-bit guess satisfies the condition of right class 0 (and of class 1) */
         double p0 = 0, p1 = 0; const double N32 = 4294967296.0;
         /* marginals per column for pair 0 / pair 1 */
         double me0[16] = {0}, me1[16] = {0}, m10[16] = {0}, m11[16] = {0}, m20[16] = {0}, m21[16] = {0};

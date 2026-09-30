@@ -1,23 +1,26 @@
 /*
- * small_aes_keyrecovery.c -- end-to-end Small-Scale AES analogue of the 5-round key-recovery
+ * small_aes_keyrecovery.c -- end-to-end Small-AES analogue of the 5-round key-recovery
  * attack (Algorithm 3): two structures (diagonals {0,1} and {2,3} active),
  * detect exchange classes (non-degenerate pairs, exchanged pair looked up by
  * index), and filter the key diagonals of k0 in three ways:
- *   strict : the previous rule -- "at least one zero cell in each active column
- *            after round-1 MC" must hold for every detected class;
- *   loo    : the same weak test, at most one failing class per structure;
+ *   strict : the weak test of the previously submitted version -- "at least one
+ *            zero cell in each active column after round-1 MC" must hold for every
+ *            detected class (not the exact pattern; not used in the paper);
+ *   loo    : the same weak test, at most one failing class per structure (not used);
  *   exact2 : the exact one-round pattern (Observation 1, 14 sets J) and the
- *            rule "consistent with at least two detected classes" (Section 4.2).
- * Classes are labelled trail / non-trail with the real key (for reporting only).
+ *            key-candidate selection rule "count >= 2" (Section 4.2).
+ * Classes are labelled right / not right with the real key (for reporting only).
+ * The elimination approach of the paper keeps the correct key iff f1 = f2 = 0.
  *
  * Usage: small_aes_keyrecovery R M trials seed
  * Output (CSV per attack):
  *   n1,f1,n2,f2,strict_ok,log2cand_strict,loo_ok,log2cand_loo,exact2_ok,
  *   log2cand_exact2,ktrue1,ktrue2
- *   n = detected classes, f = non-trail classes, *_ok = correct key kept,
- *   log2cand = log2 of the candidate count (exact2: sum over class pairs and
- *   pattern pairs, i.e. an upper bound with multiplicity), ktrue = number of
- *   classes consistent with the correct key under the exact pattern.
+ *   n = detected classes, f = detected classes that are not right classes,
+ *   *_ok = correct key kept, log2cand = log2 of the candidate count (exact2: sum
+ *   over pairs of classes and pattern pairs, i.e. an upper bound with
+ *   multiplicity), ktrue = count of the correct key (number of detected classes
+ *   whose exact pattern it satisfies).
  */
 #include <stdio.h>
 #include <stdlib.h>

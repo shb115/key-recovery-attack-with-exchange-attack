@@ -1,3 +1,4 @@
+/* Program of the previously submitted version, kept for reference; superseded by ../exchange_keyrecovery.c. */
 /*
  * key_recovery_verify_v3_fixed.c
  * - Fixed Input Filtering (Diagonal separation)

@@ -2,7 +2,7 @@
  * small_aes_r2_diagnostic.c -- variant of small_aes_distinguisher.c that also records,
  * for every detected pair, the number of zero cells / zero diagonals of the
  * difference after two rounds (used to explain the small excess of non-trail
- * classes at 5 rounds). Small-Scale AES (4-bit cells) scale model of the 5-round
+ * classes at 5 rounds). Small-AES (4-bit cells) scale model of the 5-round
  * exchange distinguisher, for measuring the full per-trial distribution
  * of the number of right pairs / equivalence classes.
  *
@@ -22,7 +22,8 @@
  * (via zero-mask histograms of column-0 / column-1 differences), which
  * gives the per-trial conditional mean lambda_t = M*q + (Ntot-M)*q*2^-16.
  *
- * Usage: sa5 R M1 M2 trials seed keymode [out.csv]
+ * Usage: small_aes_r2_diagnostic R M1 M2 trials seed keymode [out.csv] [dump_thr]
+ * (diagnostic used during the revision; no results of it are reported in the paper)
  *   keymode 0: independent random round keys; 1: same key every round.
  */
 #include <stdio.h>

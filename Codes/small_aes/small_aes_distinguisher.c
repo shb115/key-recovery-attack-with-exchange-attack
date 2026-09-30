@@ -1,5 +1,5 @@
 /*
- * small_aes_distinguisher.c -- Small-Scale AES (4-bit cells) scale model of the 5-round
+ * small_aes_distinguisher.c -- Small-AES (4-bit cells) scale model of the 5-round
  * exchange distinguisher, for measuring the full per-trial distribution
  * of the number of right pairs / equivalence classes.
  *
@@ -13,11 +13,12 @@
  * (R-1) full rounds has zero difference (last half round is bijective per
  * column after SB, SR only permutes), so we store those columns.
  *
- * For each detected right pair we also check the exact one-round exchange
- * condition (Eq.(1)) to split "trail" classes from "random" classes, and we
- * compute M = number of classes in the structure satisfying Eq.(1)
- * (via zero-mask histograms of column-0 / column-1 differences), which
- * gives the per-trial conditional mean lambda_t = M*q + (Ntot-M)*q*2^-16.
+ * For each detected pair we also check the exact one-round exchange condition
+ * (Eq.(1)) to label right classes, and we compute N_rc = number of classes of
+ * the structure satisfying Eq.(1) (via zero-mask histograms of column-0 /
+ * column-1 differences), which gives the per-trial parameter
+ * lambda_S = N_rc*2^-14 + (N_c - N_rc)*2^-30 (Section 3.3.1). The CSV columns
+ * are classes, right_classes, N_rc (named cls, trail, M in the code).
  *
  * Usage: small_aes_distinguisher R M1 M2 trials seed keymode [out.csv|-] [dump_thr]
  *   keymode 0: independent random round keys; 1: same key every round.

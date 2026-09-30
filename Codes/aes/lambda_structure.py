@@ -1,14 +1,16 @@
-"""Exact per-trial lambda_t for the FULL-AES 5-round exchange distinguisher.
+"""Exact lambda_S of random full-AES structures (Section 3.2 of the paper) without encryption.
 
-lambda_t = M_t * q + lambda_rand, where M_t = number of exchange classes in the
-2^30 structure that satisfy the one-round condition Eq.(1) (depends only on the
-two diagonal value sets and k0), q = P[ct zero on some inverse diagonal] ~ 4*2^-32,
-lambda_rand = (#classes) * 2^-62 * ... (0.0625).
+lambda_S = N_rc * q + N_c * 2^-62, where N_rc (M in the code) = number of classes of the 2^30
+structure whose pairs satisfy the one-round condition Eq.(1) (depends only on the two diagonal
+value sets and k0), q = P[ciphertext zero on some inverse diagonal] ~ 4*2^-32, and
+N_c * 2^-62 = 0.0625.
 
-M_t is computed exactly from 'agree-on-row-set' pair counts + Moebius inversion,
-so no 2^29 pair loop is needed.  RNG modes:
-  good : splitmix-like numpy PCG64
-  msvc : exact emulation of MinGW/MSVCRT rand() consumption in exchange_distinguisher.c
+N_rc is computed exactly from 'agree-on-row-set' pair counts + Moebius inversion, so no 2^29
+pair loop is needed.  Usage: python3 lambda_structure.py good|glibc|msvc T seed [m];
+output per structure: trial,N_rc,lambda_S,dupA,dupB.  Results/aes/lambda_structure/FL_good.csv
+was produced by "python3 lambda_structure.py good 2000 7".  RNG modes:
+  good : splitmix-like numpy PCG64 (distinct values)
+  msvc : exact emulation of MinGW/MSVCRT rand() consumption in legacy/exchange_distinguisher_v1.c
   glibc: emulation of glibc TYPE_3 rand()
 """
 import sys, numpy as np

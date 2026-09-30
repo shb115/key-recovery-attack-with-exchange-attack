@@ -4,35 +4,33 @@ from collections import Counter
 filename = 'Results.txt'
 
 try:
-    # 1. 파일 읽기
+    # read the log of the previous version
     with open(filename, 'r', encoding='utf-8') as f:
         log_content = f.read()
 
-    # 2. 데이터 추출
+    # extract the number of pairs found per trial
     pairs = [int(x) for x in re.findall(r'Pairs Found: (\d+)', log_content)]
     total_count = len(pairs)
 
     if total_count > 0:
-        # 3. 계산
-        # 평균
+        # statistics
         average = sum(pairs) / total_count
         
-        # 0의 등장 비율
+        # fraction of trials with no pair
         zero_count = pairs.count(0)
         zero_ratio = (zero_count / total_count) * 100
         
-        # 전체 분포 (오름차순 정렬)
+        # distribution
         distribution = dict(sorted(Counter(pairs).items()))
 
-        # 4. 결과 출력
-        print(f"평균 (Mean): {average:.4f}")
-        print(f"0의 등장 비율: {zero_ratio:.2f}% ({zero_count}/{total_count})")
-        print("전체 분포 (값: 횟수):")
+        print(f"Mean: {average:.4f}")
+        print(f"Trials with no pair: {zero_ratio:.2f}% ({zero_count}/{total_count})")
+        print("Distribution (pairs: trials):")
         for key, value in distribution.items():
             print(f"  {key}: {value}")
             
     else:
-        print("데이터가 없습니다.")
+        print("No data.")
 
 except FileNotFoundError:
-    print(f"Error: '{filename}' 파일을 찾을 수 없습니다.")
+    print(f"Error: '{filename}' not found.")
